@@ -1,0 +1,63 @@
+[tool.poetry]
+name = "fxci-etl"
+version = "0.1.0"
+description = "An ETL for the Firefox-CI Taskcluster instance"
+authors = ["Mozilla Release Engineering <release@mozilla.com>"]
+license = "MPL-2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.test.dependencies]
+coverage = "^7.4.4"
+pytest = "^8.1.1"
+pytest-mock = "^3.14.0"
+responses = "^0.25.0"
+tox = "^4.14.2"
+
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "<7"
+sphinx-autobuild = "^2024.4.16"
+sphinx-book-theme = "^1.1.2"
+
+
+[tool.poetry.group.type.dependencies]
+pyright = "^1.1.359"
+
+[tool.black]
+line-length = 88
+
+[tool.pytest.ini_options]
+xfail_strict = true
+
+[tool.coverage.run]
+parallel = true
+branch = true
+source = ["src/fxci_etl/"]
+
+[tool.ruff]
+select = [
+    "E", "W",       # pycodestyle
+    "F",            # pyflakes
+    "I",            # isort
+    "PLC", "PLE",   # pylint
+    "UP",           # pyupgrade
+    "TCH",          # flake8-type-checking
+]
+ignore = [
+    "E501",  # let black handle line-length
+]
+target-version = "py311"
+
+[tool.ruff.isort]
+known-first-party = ["fxci_etl"]
+
+[tool.pyright]
+include = ["src/fxci_etl"]
+reportUnknownParameterType = "error"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
