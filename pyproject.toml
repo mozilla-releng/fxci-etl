@@ -6,8 +6,12 @@ authors = ["Mozilla Release Engineering <release@mozilla.com>"]
 license = "MPL-2.0"
 readme = "README.md"
 
+[tool.poetry.scripts]
+fxci-etl = "fxci_etl.console:run"
+
 [tool.poetry.dependencies]
 python = "^3.11"
+kombu = "^5.3.7"
 
 [tool.poetry.group.test.dependencies]
 coverage = "^7.4.4"
