@@ -3,6 +3,8 @@ from typing import Any
 
 from kombu import Connection, Exchange, Queue
 
+from fxci_etl.config import PulseConfig
+
 
 def callback(data: dict[str, Any], message: str):
     print("=====")
@@ -10,12 +12,12 @@ def callback(data: dict[str, Any], message: str):
     pprint(message, indent=2)
 
 
-async def listen(user: str, password: str):
+async def listen(config: PulseConfig):
     with Connection(
-        hostname="pulse.mozilla.org",
-        port=5671,
-        userid=user,
-        password=password,
+        hostname=config.host,
+        port=config.port,
+        userid=config.user,
+        password=config.password,
         ssl=True,
     ) as connection:
         exchange = Exchange(
@@ -26,12 +28,12 @@ async def listen(user: str, password: str):
         )  # raise an error if exchange doesn't exist
 
         queue = Queue(
-            name=f"queue/{user}/fxci-etl",
+            name=f"queue/{config.user}/{config.queue}",
             exchange=exchange,
             routing_key="#",
-            durable=False,
+            durable=config.durable,
             exclusive=False,
-            auto_delete=True,
+            auto_delete=config.auto_delete,
         )
 
         consumer = connection.Consumer(queue, auto_declare=False, callbacks=[callback])

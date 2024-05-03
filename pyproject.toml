@@ -12,6 +12,8 @@ fxci-etl = "fxci_etl.console:run"
 [tool.poetry.dependencies]
 python = "^3.11"
 kombu = "^5.3.7"
+appdirs = "^1.4.4"
+dacite = "^1.8.1"
 
 [tool.poetry.group.test.dependencies]
 coverage = "^7.4.4"
