@@ -6,4 +6,4 @@
 
 # fxci-etl
 
-An ETL for the Firefox-CI Taskcluster instance
+An ETL for the Firefox-CI Taskcluster instance.
