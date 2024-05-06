@@ -1,15 +1,7 @@
-from pprint import pprint
-from typing import Any
-
 from kombu import Connection, Exchange, Queue
 
 from fxci_etl.config import PulseConfig
-
-
-def callback(data: dict[str, Any], message: str):
-    print("=====")
-    pprint(data, indent=2)
-    pprint(message, indent=2)
+from fxci_etl.pulse.handlers import handlers
 
 
 async def listen(config: PulseConfig):
@@ -36,7 +28,7 @@ async def listen(config: PulseConfig):
             auto_delete=config.auto_delete,
         )
 
-        consumer = connection.Consumer(queue, auto_declare=False, callbacks=[callback])
+        consumer = connection.Consumer(queue, auto_declare=False, callbacks=handlers)
         consumer.queues[0].queue_declare()
         consumer.queues[0].queue_bind()
 
