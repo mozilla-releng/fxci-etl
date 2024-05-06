@@ -6,7 +6,7 @@ from typing import Any
 import dacite
 
 
-@dataclass
+@dataclass(frozen=True)
 class PulseConfig:
     user: str
     password: str
@@ -17,7 +17,7 @@ class PulseConfig:
     auto_delete: bool = True
 
 
-@dataclass
+@dataclass(frozen=True)
 class Config:
     pulse: PulseConfig
 
