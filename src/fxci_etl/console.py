@@ -10,7 +10,7 @@ from fxci_etl.pulse import listen
 
 
 async def run_pulse(config: Config):
-    return await listen(config.pulse)
+    return await listen(config)
 
 
 def run(args: list[str] = sys.argv[1:]):

@@ -1,15 +1,16 @@
 from kombu import Connection, Exchange, Queue
 
-from fxci_etl.config import PulseConfig
+from fxci_etl.config import Config
 from fxci_etl.pulse.handlers import handlers
 
 
-async def listen(config: PulseConfig):
+async def listen(config: Config):
+    pulse = config.pulse
     with Connection(
-        hostname=config.host,
-        port=config.port,
-        userid=config.user,
-        password=config.password,
+        hostname=pulse.host,
+        port=pulse.port,
+        userid=pulse.user,
+        password=pulse.password,
         ssl=True,
     ) as connection:
         exchange = Exchange(
@@ -20,15 +21,17 @@ async def listen(config: PulseConfig):
         )  # raise an error if exchange doesn't exist
 
         queue = Queue(
-            name=f"queue/{config.user}/{config.queue}",
+            name=f"queue/{pulse.user}/{pulse.queue}",
             exchange=exchange,
             routing_key="#",
-            durable=config.durable,
+            durable=pulse.durable,
             exclusive=False,
-            auto_delete=config.auto_delete,
+            auto_delete=pulse.auto_delete,
         )
 
-        consumer = connection.Consumer(queue, auto_declare=False, callbacks=handlers)
+        callbacks = [handler(config) for handler in handlers]
+        print(callbacks)
+        consumer = connection.Consumer(queue, auto_declare=False, callbacks=callbacks)
         consumer.queues[0].queue_declare()
         consumer.queues[0].queue_bind()
 

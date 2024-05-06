@@ -18,8 +18,16 @@ class PulseConfig:
 
 
 @dataclass(frozen=True)
+class BigQueryConfig:
+    project: str
+    dataset: str
+    tables: dict[str, str]
+
+
+@dataclass(frozen=True)
 class Config:
     pulse: PulseConfig
+    bigquery: BigQueryConfig
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Config":
