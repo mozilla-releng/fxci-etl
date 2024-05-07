@@ -56,6 +56,8 @@ class Task(Record):
 
 @register()
 class BigQueryHandler(PulseHandler):
+    name = "bigquery"
+
     def __init__(self, config: Config):
         super().__init__(config)
 

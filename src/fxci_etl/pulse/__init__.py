@@ -29,7 +29,11 @@ async def listen(config: Config):
             auto_delete=pulse.auto_delete,
         )
 
-        callbacks = [handler(config) for handler in handlers]
+        callbacks = [
+            cls(config)
+            for name, cls in handlers.items()
+            if config.etl.handlers is None or name in config.etl.handlers
+        ]
         print(callbacks)
         consumer = connection.Consumer(queue, auto_declare=False, callbacks=callbacks)
         consumer.queues[0].queue_declare()

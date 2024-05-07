@@ -1,9 +1,21 @@
 import tomllib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import dacite
+
+
+@dataclass(frozen=True)
+class EtlConfig:
+    handlers: list[str] | None = None
+
+    def __post_init__(self):
+        from fxci_etl.pulse.handlers import handlers
+
+        if self.handlers:
+            for handler in self.handlers:
+                assert handler in handlers
 
 
 @dataclass(frozen=True)
@@ -28,6 +40,7 @@ class BigQueryConfig:
 class Config:
     pulse: PulseConfig
     bigquery: BigQueryConfig
+    etl: EtlConfig = field(default_factory=EtlConfig)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Config":

@@ -7,6 +7,7 @@ from fxci_etl.util.python_path import import_sibling_modules
 
 
 class PulseHandler(ABC):
+    name = ""
 
     def __init__(self, config: Config):
         self.config = config
@@ -15,12 +16,12 @@ class PulseHandler(ABC):
     def __call__(self, data: dict[str, Any], message: str) -> None: ...
 
 
-handlers: list[type[PulseHandler]] = []
+handlers: dict[str, type[PulseHandler]] = {}
 
 
 def register() -> Callable[[type[PulseHandler]], None]:
     def inner(cls: type[PulseHandler]) -> None:
-        handlers.append(cls)
+        handlers[cls.name] = cls
 
     return inner
 
