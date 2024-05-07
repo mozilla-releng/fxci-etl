@@ -46,6 +46,7 @@ class Task(Record):
     schedulerId: str
     tags: dict[str, str]
     taskGroupId: str
+    taskId: str
     taskQueueId: str
     workerType: str
 
