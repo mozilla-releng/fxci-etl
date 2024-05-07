@@ -7,7 +7,7 @@ import dacite
 from google.cloud.bigquery import Client
 
 from fxci_etl.config import Config
-from fxci_etl.pulse.handlers import PulseHandler, register
+from fxci_etl.pulse.handlers.base import PulseHandler, register
 
 
 @dataclass

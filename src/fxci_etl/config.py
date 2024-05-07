@@ -11,7 +11,7 @@ class EtlConfig:
     handlers: list[str] | None = None
 
     def __post_init__(self):
-        from fxci_etl.pulse.handlers import handlers
+        from fxci_etl.pulse.handlers.base import handlers
 
         if self.handlers:
             for handler in self.handlers:

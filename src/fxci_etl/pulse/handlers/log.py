@@ -1,7 +1,7 @@
 from pprint import pprint
 from typing import Any
 
-from fxci_etl.pulse.handlers import PulseHandler, register
+from fxci_etl.pulse.handlers.base import PulseHandler, register
 
 
 @register()

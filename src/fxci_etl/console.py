@@ -6,7 +6,7 @@ from pathlib import Path
 import appdirs
 
 from fxci_etl.config import Config
-from fxci_etl.pulse import listen
+from fxci_etl.pulse.listen import listen
 
 
 async def run_pulse(config: Config):

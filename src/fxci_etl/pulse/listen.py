@@ -1,7 +1,7 @@
 from kombu import Connection, Exchange, Queue
 
 from fxci_etl.config import Config
-from fxci_etl.pulse.handlers import handlers
+from fxci_etl.pulse.handlers.base import handlers
 
 
 async def listen(config: Config):
