@@ -21,6 +21,9 @@ class Record(ABC):
     @abstractmethod
     def table_name(cls) -> str: ...
 
+    @abstractmethod
+    def __str__(self) -> str: ...
+
 
 @dataclass
 class Run(Record):
@@ -39,6 +42,9 @@ class Run(Record):
     def table_name(cls):
         return "task_runs"
 
+    def __str__(self):
+        return f"{self.taskId} run {self.runId}"
+
 
 @dataclass
 class Task(Record):
@@ -53,6 +59,9 @@ class Task(Record):
     @classmethod
     def table_name(cls):
         return "tasks"
+
+    def __str__(self):
+        return self.taskId
 
 
 @register()
@@ -72,7 +81,10 @@ class BigQueryHandler(PulseHandler):
     def insert(self, row: Record):
         table = self.tables[row.table_name()]
         errors = self.client.insert_rows(table, [asdict(row)])
-        pprint(errors, indent=2)
+        if errors:
+            pprint(errors, indent=2)
+        else:
+            print(f"Inserted: {row}")
 
     def __call__(self, data, message):
         run_record = {"taskId": data["status"]["taskId"]}
