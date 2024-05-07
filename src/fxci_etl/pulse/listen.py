@@ -34,11 +34,13 @@ async def listen(config: Config):
             for name, cls in handlers.items()
             if config.etl.handlers is None or name in config.etl.handlers
         ]
-        print(callbacks)
         consumer = connection.Consumer(queue, auto_declare=False, callbacks=callbacks)
         consumer.queues[0].queue_declare()
         consumer.queues[0].queue_bind()
 
         with consumer:
             while True:
-                connection.drain_events(timeout=None)
+                try:
+                    connection.drain_events(timeout=None)
+                except TimeoutError:
+                    pass
