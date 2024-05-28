@@ -33,7 +33,13 @@ class PulseListenCommand(ConfigCommand):
 
     def handle(self):
         config = self.parse_config(self.option("config"))
-        queue = self.argument("name")
+        queue = self.argument("queue")
+
+        if queue not in config.pulse.queues:
+            self.line_error(
+                f"Queue '{queue}' is not configured! Choose from: {', '.join(config.pulse.queues)}"
+            )
+            return 1
 
         loop = asyncio.get_event_loop()
         loop.run_until_complete(listen(config, queue))
