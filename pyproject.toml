@@ -16,6 +16,8 @@ appdirs = "^1.4.4"
 dacite = "^1.8.1"
 google-cloud-bigquery = "^3.22.0"
 cleo = "^2.1.0"
+google-cloud-monitoring = "^2.21.0"
+google-cloud-storage = "^2.16.0"
 
 [tool.poetry.group.test.dependencies]
 coverage = "^7.4.4"

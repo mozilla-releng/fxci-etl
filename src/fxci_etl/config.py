@@ -39,7 +39,6 @@ class PulseConfig:
 class BigQueryConfig:
     project: str
     dataset: str
-    tables: dict[str, str]
 
 
 @dataclass(frozen=True)

@@ -9,6 +9,7 @@ from cleo.commands.command import Command
 from cleo.helpers import argument, option
 
 from fxci_etl.config import Config
+from fxci_etl.metric.export import export_metrics
 from fxci_etl.pulse.listen import listen
 
 APP_NAME = "fxci-etl"
@@ -66,10 +67,27 @@ class PulseListCommand(ConfigCommand):
         return 0
 
 
+class MetricExportCommand(ConfigCommand):
+    name = "metric export"
+    description = "Export configured metrics' timeseries."
+    options = ConfigCommand.options + [
+        option(
+            "--dry-run",
+            flag=True,
+            description="Print records rather than inserting them into BigQuery",
+        )
+    ]
+
+    def handle(self):
+        config = self.parse_config(self.option("config"))
+        return export_metrics(config, dry_run=self.option("dry-run"))
+
+
 def run():
     application = Application()
     application.add(PulseListenCommand())
     application.add(PulseListCommand())
+    application.add(MetricExportCommand())
     application.run()
 
 
