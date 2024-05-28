@@ -4,8 +4,10 @@ from fxci_etl.config import Config
 from fxci_etl.pulse.handlers.base import handlers
 
 
-async def listen(config: Config):
+async def listen(config: Config, name: str):
     pulse = config.pulse
+    qconf = pulse.queues[name]
+
     with Connection(
         hostname=pulse.host,
         port=pulse.port,
@@ -13,20 +15,18 @@ async def listen(config: Config):
         password=pulse.password,
         ssl=True,
     ) as connection:
-        exchange = Exchange(
-            "exchange/taskcluster-queue/v1/task-completed", type="topic"
-        )
+        exchange = Exchange(qconf.exchange, type="topic")
         exchange(connection).declare(
             passive=True
         )  # raise an error if exchange doesn't exist
 
         queue = Queue(
-            name=f"queue/{pulse.user}/{pulse.queue}",
+            name=f"queue/{pulse.user}/{name}",
             exchange=exchange,
-            routing_key="#",
-            durable=pulse.durable,
+            routing_key=qconf.routing_key,
+            durable=qconf.durable,
             exclusive=False,
-            auto_delete=pulse.auto_delete,
+            auto_delete=qconf.auto_delete,
         )
 
         callbacks = [

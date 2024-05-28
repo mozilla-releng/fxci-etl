@@ -19,14 +19,20 @@ class EtlConfig:
 
 
 @dataclass(frozen=True)
+class PulseQueueConfig:
+    exchange: str
+    durable: bool = False
+    auto_delete: bool = True
+    routing_key: str = "#"
+
+
+@dataclass(frozen=True)
 class PulseConfig:
     user: str
     password: str
     host: str = "pulse.mozilla.org"
     port: int = 5671
-    queue: str = "fxci-etl"
-    durable: bool = False
-    auto_delete: bool = True
+    queues: dict[str, PulseQueueConfig] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

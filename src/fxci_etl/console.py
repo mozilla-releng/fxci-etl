@@ -1,37 +1,71 @@
 import asyncio
 import sys
-from argparse import ArgumentParser
+from dataclasses import asdict
 from pathlib import Path
 
 import appdirs
+from cleo.application import Application
+from cleo.commands.command import Command
+from cleo.helpers import argument, option
 
 from fxci_etl.config import Config
 from fxci_etl.pulse.listen import listen
 
-
-async def run_pulse(config: Config):
-    return await listen(config)
+APP_NAME = "fxci-etl"
 
 
-def run(args: list[str] = sys.argv[1:]):
-    appname = "fxci-etl"
+class ConfigCommand(Command):
+    options = [
+        option("--config", description="Path to config file to use.", default=None)
+    ]
 
-    parser = ArgumentParser(prog=appname, description="Firefox-CI ETL")
-    parser.add_argument(
-        "--config",
-        dest="config_path",
-        nargs="?",
-        default=None,
-        help="Path to config file",
-    )
+    def parse_config(self, config_path: str | Path | None) -> Config:
+        if not config_path:
+            config_path = Path(appdirs.user_config_dir(APP_NAME)) / "config.toml"
 
-    subparsers = parser.add_subparsers(help="Commands")
-    pulse_parser = subparsers.add_parser("pulse")
-    pulse_parser.set_defaults(func=run_pulse)
+        return Config.from_file(config_path)
 
-    ns = parser.parse_args(args)
-    config_path: str = ns.config_path or appdirs.user_config_dir(appname)
-    config = Config.from_file(Path(config_path) / "config.toml")
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(ns.func(config))
+class PulseListenCommand(ConfigCommand):
+    name = "pulse listen"
+    description = "Listen on the specified pulse queue."
+    arguments = [argument("queue", description="Pulse queue to listen on.")]
+
+    def handle(self):
+        config = self.parse_config(self.option("config"))
+        queue = self.argument("name")
+
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(listen(config, queue))
+        return 0
+
+
+class PulseListCommand(ConfigCommand):
+    name = "pulse list"
+    description = "List configured pulse exchanges."
+
+    def handle(self):
+        config = self.parse_config(self.option("config"))
+
+        for name, queue in config.pulse.queues.items():
+            self.line(f"<fg=blue;options=bold>{name}</>")
+            for key in sorted(asdict(queue)):
+                value = getattr(queue, key)
+                if isinstance(value, int | bool):
+                    value = f"<fg=blue>{value}</>"
+                elif isinstance(value, str):
+                    value = f'<fg=light_red>"{value}"</>'
+                self.line(f"<fg=dark_gray>{key}</>={value}")
+            self.line("")
+        return 0
+
+
+def run():
+    application = Application()
+    application.add(PulseListenCommand())
+    application.add(PulseListCommand())
+    application.run()
+
+
+if __name__ == "__main__":
+    sys.exit(run())
