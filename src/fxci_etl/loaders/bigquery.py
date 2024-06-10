@@ -47,12 +47,11 @@ class BigQueryLoader:
             tables[record.table_name()].append(record)
 
         for name, rows in tables.items():
-            print(rows[0])
             table = self.get_table(name)
             errors = self.client.insert_rows(table, [asdict(row) for row in rows])
 
             if errors:
                 pprint(errors, indent=2)
 
-            num_inserted = len(records) - len(errors)
+            num_inserted = len(rows) - len(errors)
             print(f"Inserted {num_inserted} records in table '{table}'")
