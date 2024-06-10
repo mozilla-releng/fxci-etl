@@ -1,4 +1,3 @@
-import asyncio
 import sys
 from dataclasses import asdict
 from pathlib import Path
@@ -10,7 +9,7 @@ from cleo.helpers import argument, option
 
 from fxci_etl.config import Config
 from fxci_etl.metric.export import export_metrics
-from fxci_etl.pulse.listen import listen
+from fxci_etl.pulse.consume import drain, listen
 
 APP_NAME = "fxci-etl"
 
@@ -42,8 +41,26 @@ class PulseListenCommand(ConfigCommand):
             )
             return 1
 
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(listen(config, queue))
+        listen(config, queue)
+        return 0
+
+
+class PulseDrainCommand(ConfigCommand):
+    name = "pulse drain"
+    description = "Process events in the specified pulse queue and exit."
+    arguments = [argument("queue", description="Pulse queue to drain.")]
+
+    def handle(self):
+        config = self.parse_config(self.option("config"))
+        queue = self.argument("queue")
+
+        if queue not in config.pulse.queues:
+            self.line_error(
+                f"Queue '{queue}' is not configured! Choose from: {', '.join(config.pulse.queues)}"
+            )
+            return 1
+
+        drain(config, queue)
         return 0
 
 
