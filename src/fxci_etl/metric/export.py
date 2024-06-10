@@ -100,7 +100,10 @@ def export_metrics(config: Config, dry_run: bool = False) -> int:
     interval = get_time_interval(dry_run)
 
     records = []
-    for project in ("fxci-production-level1-workers", "fxci-production-level3-workers"):
+    for project in (
+        "fxci-production-level1-workers",
+        #  "fxci-production-level3-workers",
+    ):
         for ts in get_timeseries(project, interval):
             if dry_run:
                 pprint(ts)
