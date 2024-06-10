@@ -18,7 +18,8 @@ from fxci_etl.config import Config
 from fxci_etl.loaders.bigquery import BigQueryLoader, Record
 
 METRIC = "compute.googleapis.com/instance/uptime"
-SAMPLE_HOURS = 6
+DEFAULT_INTERVAL = 3600 * 6
+MINIMUM_INTERVAL = 10
 
 
 @dataclass
@@ -81,11 +82,11 @@ def get_time_interval(dry_run: bool = False) -> TimeInterval:
     try:
         start_time = json.loads(blob.download_as_string())["end_time"]
     except NotFound:
-        start_time = int((end_time - timedelta(hours=SAMPLE_HOURS)).timestamp())
+        start_time = int((end_time - timedelta(seconds=MINIMUM_INTERVAL)).timestamp())
 
     end_time = int(end_time.timestamp())
 
-    if start_time > end_time:
+    if start_time + MINIMUM_INTERVAL > end_time:
         raise Exception("Abort: metric export ran too recently!")
 
     if not dry_run:
