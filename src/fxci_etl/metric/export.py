@@ -120,7 +120,9 @@ def export_metrics(config: Config, dry_run: bool = False) -> int:
             }
             records.append(WorkerUptime.from_dict(data))
 
-    if records:
-        loader = BigQueryLoader(config)
-        loader.insert(records)
+    if not records:
+        raise Exception("Abort: No records retrieved!")
+
+    loader = BigQueryLoader(config)
+    loader.insert(records)
     return 0
