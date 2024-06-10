@@ -35,13 +35,11 @@ class Tag:
 
 @dataclass
 class Task(Record):
-    provisionerId: str
     schedulerId: str
-    tags: list[Tag]
     taskGroupId: str
     taskId: str
     taskQueueId: str
-    workerType: str
+    tags: list[Tag]
 
     @classmethod
     def table_name(cls):
@@ -88,14 +86,11 @@ class BigQueryHandler(PulseHandler):
                         {"key": k, "value": v} for k, v in data["task"]["tags"].items()
                     ]
                 }
-                print(task_record)
                 for key in (
-                    "provisionerId",
                     "schedulerId",
                     "taskGroupId",
                     "taskId",
                     "taskQueueId",
-                    "workerType",
                 ):
                     task_record[key] = data["status"][key]
 
