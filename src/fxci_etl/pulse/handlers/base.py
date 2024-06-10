@@ -3,6 +3,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
+from kombu import Message
+
 from fxci_etl.config import Config
 from fxci_etl.util.python_path import import_sibling_modules
 
@@ -10,7 +12,7 @@ from fxci_etl.util.python_path import import_sibling_modules
 @dataclass
 class Event:
     data: dict[str, Any]
-    message: str
+    message: Message
 
 
 class PulseHandler(ABC):
@@ -21,7 +23,8 @@ class PulseHandler(ABC):
         self.buffered = buffered
         self._buffer: list[Event] = []
 
-    def __call__(self, data: dict[str, Any], message: str) -> None:
+    def __call__(self, data: dict[str, Any], message: Message) -> None:
+        message.ack()
         event = Event(data, message)
         if self.buffered:
             self._buffer.append(event)
