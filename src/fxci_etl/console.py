@@ -103,6 +103,7 @@ class MetricExportCommand(ConfigCommand):
 def run():
     application = Application()
     application.add(PulseListenCommand())
+    application.add(PulseDrainCommand())
     application.add(PulseListCommand())
     application.add(MetricExportCommand())
     application.run()
