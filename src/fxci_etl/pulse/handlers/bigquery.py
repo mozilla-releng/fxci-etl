@@ -28,10 +28,16 @@ class Run(Record):
 
 
 @dataclass
+class Tag:
+    key: str
+    value: str
+
+
+@dataclass
 class Task(Record):
     provisionerId: str
     schedulerId: str
-    tags: dict[str, str]
+    tags: list[Tag]
     taskGroupId: str
     taskId: str
     taskQueueId: str
@@ -77,7 +83,12 @@ class BigQueryHandler(PulseHandler):
 
             if run_record["runId"] == 0:
                 # Only insert the task record for run 0 to avoid duplicate records.
-                task_record = {"tags": data["task"]["tags"]}
+                task_record = {
+                    "tags": [
+                        {"key": k, "value": v} for k, v in data["task"]["tags"].items()
+                    ]
+                }
+                print(task_record)
                 for key in (
                     "provisionerId",
                     "schedulerId",
