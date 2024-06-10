@@ -71,15 +71,17 @@ class BigQueryHandler(PulseHandler):
             run_record[key] = data["status"]["runs"][-1][key]
         self.loader.insert(Run.from_dict(run_record))
 
-        task_record = {"tags": data["task"]["tags"]}
-        for key in (
-            "provisionerId",
-            "schedulerId",
-            "taskGroupId",
-            "taskId",
-            "taskQueueId",
-            "workerType",
-        ):
-            task_record[key] = data["status"][key]
+        if run_record["runId"] == 0:
+            # Only insert the task record for run 0 to avoid duplicate records.
+            task_record = {"tags": data["task"]["tags"]}
+            for key in (
+                "provisionerId",
+                "schedulerId",
+                "taskGroupId",
+                "taskId",
+                "taskQueueId",
+                "workerType",
+            ):
+                task_record[key] = data["status"][key]
 
-        self.loader.insert(Task.from_dict(task_record))
+            self.loader.insert(Task.from_dict(task_record))
