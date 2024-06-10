@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 
 from fxci_etl.config import Config
 from fxci_etl.loaders.bigquery import BigQueryLoader, Record
@@ -48,8 +49,8 @@ class Task(Record):
 class BigQueryHandler(PulseHandler):
     name = "bigquery"
 
-    def __init__(self, config: Config):
-        super().__init__(config)
+    def __init__(self, config: Config, **kwargs: Any):
+        super().__init__(config, **kwargs)
         self.loader = BigQueryLoader(self.config)
 
     def process_events(self, events):
