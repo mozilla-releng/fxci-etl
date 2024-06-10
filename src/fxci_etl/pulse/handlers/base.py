@@ -1,19 +1,35 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import Any
 
 from fxci_etl.config import Config
 from fxci_etl.util.python_path import import_sibling_modules
 
 
+@dataclass
+class Event:
+    data: dict[str, Any]
+    message: str
+
+
 class PulseHandler(ABC):
     name = ""
 
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, buffered=True):
         self.config = config
+        self.buffered = buffered
+        self._buffer: list[Event] = []
+
+    def __call__(self, data: dict[str, Any], message: str) -> None:
+        event = Event(data, message)
+        if self.buffered:
+            self._buffer.append(event)
+        else:
+            self.process_events([event])
 
     @abstractmethod
-    def __call__(self, data: dict[str, Any], message: str) -> None: ...
+    def process_events(self, events: list[Event]) -> None: ...
 
 
 handlers: dict[str, type[PulseHandler]] = {}

@@ -1,5 +1,4 @@
 from pprint import pprint
-from typing import Any
 
 from fxci_etl.pulse.handlers.base import PulseHandler, register
 
@@ -8,6 +7,6 @@ from fxci_etl.pulse.handlers.base import PulseHandler, register
 class LogHandler(PulseHandler):
     name = "log"
 
-    def __call__(self, data: dict[str, Any], message: str) -> None:
-        pprint(data, indent=2)
-        pprint(message, indent=2)
+    def process_events(self, events) -> None:
+        for event in events:
+            pprint(event, indent=2)

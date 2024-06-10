@@ -52,36 +52,42 @@ class BigQueryHandler(PulseHandler):
         super().__init__(config)
         self.loader = BigQueryLoader(self.config)
 
-    def __call__(self, data, message):
-        run_record = {"taskId": data["status"]["taskId"]}
+    def process_events(self, events):
+        records = []
+        for event in events:
+            data = event.data
+            run_record = {"taskId": data["status"]["taskId"]}
 
-        for key in ("runId", "workerGroup", "workerId"):
-            run_record[key] = data[key]
+            for key in ("runId", "workerGroup", "workerId"):
+                run_record[key] = data[key]
 
-        for key in (
-            "reasonCreated",
-            "reasonResolved",
-            "resolved",
-            "scheduled",
-            "started",
-            "state",
-            "workerGroup",
-            "workerId",
-        ):
-            run_record[key] = data["status"]["runs"][-1][key]
-        self.loader.insert(Run.from_dict(run_record))
-
-        if run_record["runId"] == 0:
-            # Only insert the task record for run 0 to avoid duplicate records.
-            task_record = {"tags": data["task"]["tags"]}
             for key in (
-                "provisionerId",
-                "schedulerId",
-                "taskGroupId",
-                "taskId",
-                "taskQueueId",
-                "workerType",
+                "reasonCreated",
+                "reasonResolved",
+                "resolved",
+                "scheduled",
+                "started",
+                "state",
+                "workerGroup",
+                "workerId",
             ):
-                task_record[key] = data["status"][key]
+                run_record[key] = data["status"]["runs"][-1][key]
+            records.append(Run.from_dict(run_record))
 
-            self.loader.insert(Task.from_dict(task_record))
+            if run_record["runId"] == 0:
+                # Only insert the task record for run 0 to avoid duplicate records.
+                task_record = {"tags": data["task"]["tags"]}
+                for key in (
+                    "provisionerId",
+                    "schedulerId",
+                    "taskGroupId",
+                    "taskId",
+                    "taskQueueId",
+                    "workerType",
+                ):
+                    task_record[key] = data["status"][key]
+
+                records.append(Task.from_dict(task_record))
+
+        if records:
+            self.loader.insert(records)
