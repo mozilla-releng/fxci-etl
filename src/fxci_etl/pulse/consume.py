@@ -62,11 +62,14 @@ def drain(config: Config, name: str):
         if config.etl.handlers is None or name in config.etl.handlers
     ]
     with get_connection(config) as connection:
-        with get_consumer(config, connection, name, callbacks):
-            try:
-                connection.drain_events(timeout=1)
-            except TimeoutError:
-                pass
+        with get_consumer(config, connection, name, callbacks) as consumer:
+            while True:
+                try:
+                    connection.drain_events(timeout=1)
+                except TimeoutError:
+                    count = consumer.queues[0].queue_declare().message_count
+                    if count < 100:
+                        break
 
     for callback in callbacks:
         callback.process_buffer()
