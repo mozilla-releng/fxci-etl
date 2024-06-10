@@ -28,6 +28,10 @@ class PulseHandler(ABC):
         else:
             self.process_events([event])
 
+    def process_buffer(self):
+        self.process_events(self._buffer)
+        self._buffer = []
+
     @abstractmethod
     def process_events(self, events: list[Event]) -> None: ...
 

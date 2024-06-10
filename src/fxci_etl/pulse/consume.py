@@ -63,7 +63,10 @@ def drain(config: Config, name: str):
     ]
     with get_connection(config) as connection:
         with get_consumer(config, connection, name, callbacks):
-            connection.drain_events(timeout=0)
+            try:
+                connection.drain_events(timeout=0)
+            except TimeoutError:
+                pass
 
     for callback in callbacks:
-        callback.process_events()
+        callback.process_buffer()
