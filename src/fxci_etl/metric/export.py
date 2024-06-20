@@ -28,8 +28,8 @@ class WorkerUptime(Record):
     project: str
     zone: str
     uptime: float
-    start_time: float
-    end_time: float
+    interval_start_time: float
+    interval_end_time: float
 
     @classmethod
     def table_name(cls):
@@ -110,15 +110,20 @@ def export_metrics(config: Config, dry_run: bool = False) -> int:
                 pprint(ts)
                 continue
 
-            data = {
-                "project": ts.resource.labels["project_id"],
-                "zone": ts.resource.labels["zone"],
-                "instance_id": ts.resource.labels["instance_id"],
-                "uptime": round(ts.points[0].value.double_value, 2),
-                "start_time": ts.points[0].interval.start_time.timestamp(),
-                "end_time": ts.points[0].interval.end_time.timestamp(),
-            }
-            records.append(WorkerUptime.from_dict(data))
+            records.append(
+                WorkerUptime.from_dict(
+                    {
+                        "project": ts.resource.labels["project_id"],
+                        "zone": ts.resource.labels["zone"],
+                        "instance_id": ts.resource.labels["instance_id"],
+                        "uptime": round(ts.points[0].value.double_value, 2),
+                        "interval_start_time": ts.points[
+                            0
+                        ].interval.start_time.timestamp(),
+                        "interval_end_time": ts.points[0].interval.end_time.timestamp(),
+                    }
+                )
+            )
 
     if not records:
         raise Exception("Abort: No records retrieved!")
