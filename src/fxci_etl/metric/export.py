@@ -89,12 +89,16 @@ def get_time_interval(dry_run: bool = False) -> TimeInterval:
     if start_time + MINIMUM_INTERVAL > end_time:
         raise Exception("Abort: metric export ran too recently!")
 
-    if not dry_run:
-        blob.upload_from_string(json.dumps({"end_time": end_time}))
-
     return TimeInterval(
         end_time=Timestamp(seconds=end_time), start_time=Timestamp(seconds=start_time)
     )
+
+
+def set_last_end_time(end_time: int):
+    client = storage.Client()
+    bucket = client.bucket("fxci-etl")
+    blob = bucket.blob("last_uptime_export_interval.json")
+    blob.upload_from_string(json.dumps({"end_time": end_time}))
 
 
 def export_metrics(config: Config, dry_run: bool = False) -> int:
@@ -125,8 +129,13 @@ def export_metrics(config: Config, dry_run: bool = False) -> int:
                 )
             )
 
+    if dry_run:
+        return 0
+
     if not records:
         raise Exception("Abort: No records retrieved!")
+
+    set_last_end_time(int(interval.end_time.timestamp()))
 
     loader = BigQueryLoader(config)
     loader.insert(records)
